@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,secretsmanager # 必要なAWSサービスをここに列挙
+      - DEBUG=0
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"

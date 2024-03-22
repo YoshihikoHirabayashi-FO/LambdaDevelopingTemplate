@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: サンプルのLambda Layerを含むSAMテンプレート
+
+Globals:
+  Function:
+    Environment:
+      Variables:
+        AWS_ACCESS_KEY_ID: test
+        AWS_SECRET_ACCESS_KEY: test
+        AWS_DEFAULT_REGION: us-east-1
+        AWS_ENDPOINT_URL: http://host.docker.internal:4566
+        S3_BUCKET_NAME: my-localstack-bucket
+
+Resources:
+  MyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+
+  MySampleLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: my-sample-layer
+      Description: サンプル用のLambda Layer
+      ContentUri: lambda_layer.zip
+      CompatibleRuntimes:
+        - python3.12
+      LicenseInfo: 'Available under the MIT-0 license.'
+      RetentionPolicy: Retain
+
+  HelloWorld:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/
+      Handler: hello_world.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref MySampleLayer
+      Events:
+        MyApiEvent:
+          Type: Api
+          Properties:
+            Path: /api/hello_world
+            Method: get
+            RestApiId:
+              Ref: MyApi
+
+  S3Write:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/
+      Handler: s3write.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref MySampleLayer
+      Events:
+        MyApiEvent:
+          Type: Api
+          Properties:
+            Path: /api/s3write
+            Method: get
+            RestApiId:
+              Ref: MyApi
+
+  S3Read:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/
+      Handler: s3read.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref MySampleLayer
+      Events:
+        MyApiEvent:
+          Type: Api
+          Properties:
+            Path: /api/s3read
+            Method: get
+            RestApiId:
+              Ref: MyApi
+
+  Secrets:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/functions/
+      Handler: secrets_demo.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref MySampleLayer
+      Events:
+        MyApiEvent:
+          Type: Api
+          Properties:
+            Path: /api/secrets
+            Method: get
+            RestApiId:
+              Ref: MyApi
+
+

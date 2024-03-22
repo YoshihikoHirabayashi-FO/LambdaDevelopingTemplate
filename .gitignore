@@ -1,0 +1,5 @@
+.aws-sam
+.localstack
+
+lambda_layer.zip
+buil_layer.log
